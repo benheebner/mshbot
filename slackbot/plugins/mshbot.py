@@ -95,7 +95,7 @@ def get_all_onboard_issues(jira, location_id):
 
 def get_all_jira_issues(jira, location_id):
     issues = jira.search_issues("""project in (PLATFORM,STUDIO)
-     AND 'Location ID' ~ %s""" % location_id)
+     AND 'Location ID' ~ %s ORDER BY created ASC""" % location_id)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
@@ -188,17 +188,22 @@ class formatter:
     def search_results(issues):
         counter = 0;
         str_list = []
+        name = ""
         for issue in issues:
             counter += 1
             if counter > 10:
                 break;
-            str_list.append("""<%s|%s>: %s\n""" % (formatter.get_issue_link(issue), issue.key, issue.fields.summary))
+            if issue.fields.issuetype.id == platform_audit_id:
+                name = issue.fields.summary
+            str_list.append("""%s %s: Created: %s\n""" % (issue.fields.status.name,
+                                                      formatter.build_link(formatter.get_issue_link(issue), issue.key),
+                                                      formatter.get_date_time(issue.fields.created))
 
         return [{
             "fallback": "Results",
             "pretext": "Results",
             "color": "#36a64f",
-            "title": "Found %d issues" % len(issues),
+            "title": "%s - %d issues" % (name, len(issues)),
             "text": ''.join(str_list),
             "mrkdwn_in": ["text", "pretext", "fields"]
         }]
