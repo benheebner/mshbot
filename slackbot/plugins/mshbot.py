@@ -159,6 +159,7 @@ class formatter:
         str_list = []
         str_list.append(""">*Assignee: * %s\n""" % formatter.get_assignee(issue))
         str_list.append(""">*Status: * %s\n""" % issue.fields.status.name)
+        str_list.append("""Last Updated: * %s\n""" % formatter.get_date_time(issue.fields.updated))
 
         if formatter.get_issuetype(issue) == "Platform Audit":
             str_list.append(""">*Offer Photoshoot:* %s\n""" % issue.fields.customfield_10212.value)
@@ -169,8 +170,10 @@ class formatter:
         elif formatter.get_issuetype(issue) == "Photoshoot":
             str_list.append(
                 ">*Photoshoot Date: * %s\n" % formatter.get_date_time(issue.fields.customfield_10205))
+            str_list.append("""><%s|%s>""" % (issue.fields.customfield_10208, "Pixieset URL"))
         elif formatter.get_issuetype(issue) == "Customer Voice":
             str_list.append(""">*Approval Timestamp:* %s\n""" % formatter.get_date_time(issue.fields.customfield_11405))
+            str_list.append("""><%s|%s>""" % (issue.fields.customfield_10210, "Passport URL"))
         return ''.join(str_list)
 
     @staticmethod
