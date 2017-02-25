@@ -104,14 +104,12 @@ class formatter:
 
     @staticmethod
     def build_link(url, text):
-        if formatter.should_jira_link(url):
+        if formatter.should_jira_link():
             return "<%s|%s>" % (url, text)
         return text
 
     @staticmethod
-    def should_jira_link(url):
-        if 'atlassian' not in url:
-            return True
+    def should_jira_link():
         should_link = os.environ.get('CREATE_JIRA_LINKS')
         if should_link is not None and should_link == "YES":
             return True
@@ -123,7 +121,7 @@ class formatter:
 
     @staticmethod
     def get_issue_link(issue):
-        if formatter.should_jira_link(issue.self):
+        if formatter.should_jira_link():
             return formatter.issue_url % issue.key
         return ""
 
