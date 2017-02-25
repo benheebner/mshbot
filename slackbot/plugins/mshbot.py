@@ -98,7 +98,7 @@ def get_all_onboard_issues(jira, location_id):
 def get_all_jira_issues(jira, location_id):
     issues = jira.search_issues("""project in (PLATFORM,STUDIO)
      AND 'Location ID' ~ %s ORDER BY created ASC""" % location_id)
-    return {str(issue.fields.issuetype.id): issue for issue in issues}
+    return issues
 
 
 class formatter:
@@ -191,7 +191,7 @@ class formatter:
         counter = 0;
         str_list = []
         name = ""
-        for issue in issues.values():
+        for issue in issues:
             counter += 1
             if counter > 10:
                 break;
