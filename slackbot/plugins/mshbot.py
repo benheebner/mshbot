@@ -226,7 +226,7 @@ class formatter:
             "title": business_name,
             "fields": [
                 {
-                    "title": formatter.build_link(formatter.get_issue_link(audit), ("Platform Audit: %s" % audit.key),
+                    "title": formatter.build_link(formatter.get_issue_link(audit), ("Platform Audit: %s" % audit.key)),
                     "value": formatter.short_summary(audit),
                     "short": "true"
                 },
