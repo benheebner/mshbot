@@ -82,7 +82,7 @@ def authenticate():
 
 def get_all_issues_salesforce_id(jira, sfid):
     issues = jira.search_issues(
-        """project in (PLATFORM,STUDIO) AND 
+        """project in (PLATFORM,STUDIO) AND
         AND issuetype in ('Platform Audit', Credentials, 'Platform Setup', 'Customer Voice', 'Photoshoot')
         'Salesforce ID' ~ '%s'""" % sfid)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
@@ -191,7 +191,7 @@ class formatter:
         counter = 0;
         str_list = []
         name = ""
-        for issue in issues:
+        for issue in issues.values():
             counter += 1
             if counter > 10:
                 break;
