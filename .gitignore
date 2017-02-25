@@ -1,0 +1,26 @@
+# IntelliJ Files
+.idea/
+*.ipr
+*.iws
+*.iml
+*.log
+
+# Eclipse Files
+.classpath
+.project
+
+# Build outputs
+target/
+*.pyc
+
+# Vagrant outputs
+.vagrant
+
+# OS hidden files
+.DS_Store
+
+# Temporary Maven files
+dependency-reduced-pom.xml
+
+# Hive
+metastore_db/
