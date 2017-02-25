@@ -197,7 +197,7 @@ class formatter:
                 break;
             if issue.fields.issuetype.id == platform_audit_id:
                 name = issue.fields.summary
-            str_list.append("""%s %s: Created: %s\n""" % (issue.fields.status.name,
+            str_list.append("""%s %s: Created: %s\n""" % (formatter.get_issuetype(issue),
                                                       formatter.build_link(formatter.get_issue_link(issue), issue.key),
                                                       formatter.get_date_time(issue.fields.created)))
 
