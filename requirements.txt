@@ -1,0 +1,6 @@
+requests>=2.4.0
+websocket-client>=0.22.0
+slacker>=0.5.5
+six>=1.10.0
+jira==1.0.7
+python-dateutil >= 2.4.2
