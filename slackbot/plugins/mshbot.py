@@ -43,7 +43,7 @@ def jira_location(message, location_id):
 @respond_to('jira location (.*)')
 def jira_location(message, location_id):
     jira = authenticate()
-    response = formatter.location_summary(get_all_jira_issues(jira, location_id), "Location ID", location_id)
+    response = formatter.search_results(get_all_jira_issues(jira, location_id), "Location ID", location_id)
     message.reply_webapi('Location Summary', attachments=json.dumps(response))
 
 
