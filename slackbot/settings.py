@@ -10,7 +10,7 @@ PLUGINS = [
 
 ERRORS_TO = None
 
-# API_TOKEN = '###token###'
+API_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
 
 '''
 Setup a comma delimited list of aliases that the bot will respond to.
@@ -34,7 +34,7 @@ effect.
 # BOT_EMOJI = ':godmode:'
 
 '''Specify a different reply when the bot is messaged with no matching cmd'''
-DEFAULT_REPLY = None
+DEFAULT_REPLY = "Ugh. I don't know what you're trying to say."
 
 for key in os.environ:
     if key[:9] == 'SLACKBOT_':
