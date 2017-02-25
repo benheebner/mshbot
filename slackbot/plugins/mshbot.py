@@ -222,7 +222,7 @@ class formatter:
         if os.environ.get('CREATE_JIRA_LINKS'):
             link = """https://msh-success.atlassian.net/issues/?jql=project%20in%20(PLATFORM%2CSTUDIO)
         %0A%20%20%20%20%20AND%20issuetype%20in%20(%27Platform%20Audit%27%2C%20Credentials%2C%20%27Platform%20Setup
-        %27%2C%20%27Customer%20Voice%27%2C%20%27Photoshoot%27)%20%0A%20%20%20%20%20AND%20%27Location%20ID%27%20~%20%s""" % location_id
+        %27%2C%20%27Customer%20Voice%27%2C%20%27Photoshoot%27)%20%0A%20%20%20%20%20AND%20%27Location%20ID%27%20~%20%%s""" % location_id
 
         return [{
             "fallback": "Onboarding Information for %s" % business_name,
