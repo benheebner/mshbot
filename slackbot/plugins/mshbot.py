@@ -43,7 +43,7 @@ def jira_location(message, location_id):
 @respond_to('jira location (.*)')
 def jira_location(message, location_id):
     jira = authenticate()
-    response = formatter.search_results(get_all_jira_issues(jira, location_id), "Location ID", location_id)
+    response = formatter.search_results(get_all_jira_issues(jira, location_id))
     message.reply_webapi('Location Summary', attachments=json.dumps(response))
 
 
@@ -82,7 +82,9 @@ def authenticate():
 
 def get_all_issues_salesforce_id(jira, sfid):
     issues = jira.search_issues(
-        """project in (PLATFORM,STUDIO) AND 'Salesforce ID' ~ '%s'""" % sfid)
+        """project in (PLATFORM,STUDIO) AND 
+        AND issuetype in ('Platform Audit', Credentials, 'Platform Setup', 'Customer Voice', 'Photoshoot')
+        'Salesforce ID' ~ '%s'""" % sfid)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
