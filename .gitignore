@@ -1,5 +1,6 @@
 # IntelliJ Files
 .idea/
+.idea/workspace.xml
 *.ipr
 *.iws
 *.iml

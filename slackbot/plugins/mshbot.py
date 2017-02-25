@@ -32,6 +32,7 @@ resolution_id_photoshoot_not_offered = '10400'
 resolution_id_photoshoot_opted_out = '10100'
 link_id_blocks = '10000'
 
+
 @respond_to('jira onboard (.*)')
 def jira_location(message, location_id):
     jira = authenticate()
