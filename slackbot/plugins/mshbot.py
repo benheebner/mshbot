@@ -176,7 +176,7 @@ class formatter:
     @staticmethod
     def short_summary(issue):
         str_list = []
-        str_list.append(""">*Status: *%s\n""" % formatter.build_link(formatter.get_issue_link(issue), issue.fields.status.name))
+        str_list.append(""">*Status: * %s\n""" % formatter.build_link(formatter.get_issue_link(issue), issue.fields.status.name))
         str_list.append(""">*Updated: * %s\n""" % formatter.get_date_time(issue.fields.updated))
         str_list.append(""">*Assignee: * %s\n""" % formatter.get_assignee(issue))
         return ''.join(str_list)
