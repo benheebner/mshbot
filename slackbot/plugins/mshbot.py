@@ -32,9 +32,14 @@ resolution_id_photoshoot_not_offered = '10400'
 resolution_id_photoshoot_opted_out = '10100'
 link_id_blocks = '10000'
 
+def is_admin(user):
+    if user == 'D44H7U0HM' or user == 'C38NCTQQ1':
+        return True
+    return False
+
 
 @respond_to('jira onboard (.*)')
-def jira_location(message, location_id):
+def jira_onboard(message, location_id):
     jira = authenticate()
     response = formatter.location_summary(get_all_onboard_issues(jira, location_id), "Location ID", location_id)
     message.reply_webapi('Onboard Summary', attachments=json.dumps(response))
@@ -46,16 +51,45 @@ def jira_location(message, location_id):
     response = formatter.search_results(get_all_jira_issues(jira, location_id))
     message.reply_webapi('Location Summary', attachments=json.dumps(response))
 
+@respond_to('jira link (.*)')
+def jira_sflink(message, location_id):
+   if is_admin(message.body['channel']):
+       jira = authenticate();
+       issueDict = get_all_onboard_issues(jira, location_id)
+       jira.create_issue_link('Platform Audit to Credentials', issueDict[platform_audit_id].key,
+                              issueDict[credentials_id])
+       jira.create_issue_link('Platform Audit to Platform Setup', issueDict[platform_audit_id].key,
+                              issueDict[platform_setup_id])
+       jira.create_issue_link('Platform Audit to Customer Voice', issueDict[platform_audit_id].key,
+                              issueDict[customer_voice_id])
+       jira.create_issue_link('Platform Audit to Photoshoot', issueDict[platform_audit_id].key,
+                              issueDict[photoshoot_id])
+       jira.create_issue_link('Credentials to Platform Setup', issueDict[credentials_id].key,
+                              issueDict[platform_setup_id])
+       jira.create_issue_link('Credentials to Customer Voice', issueDict[credentials_id].key,
+                              issueDict[customer_voice_id])
+       jira.create_issue_link('Credentials to Photoshoot', issueDict[credentials_id].key,
+                              issueDict[photoshoot_id])
+       jira.create_issue_link('Photoshoot to Platform Setup', issueDict[photoshoot_id].key,
+                              issueDict[platform_setup_id])
+       jira.create_issue_link('Photoshoot to Customer Voice', issueDict[photoshoot_id].key,
+                              issueDict[customer_voice_id])
+       jira.create_issue_link('Customer Voice to Platform Setup', issueDict[customer_voice_id].key,
+                              issueDict[platform_setup_id])
+       response = formatter.location_summary(get_all_onboard_issues(jira, location_id), "Location ID", location_id)
+       message.reply_webapi('Onboard Summary', attachments=json.dumps(response))
+   else:
+       message.reply_webapi('Is Not Admin')
 
 @respond_to('jira sf (.*)')
-def jira_location(message, sfid):
+def jira_sf(message, sfid):
     jira = authenticate()
     response = formatter.location_summary(get_all_issues_salesforce_id(jira, sfid), "Salesforce ID", sfid)
     message.reply_webapi('Location Summary', attachments=json.dumps(response))
 
 
 @respond_to('jira (PLATFORM\W[0-9]*|STUDIO\W[0-9]*)')
-def jira_location(message, key):
+def jira_issue(message, key):
     jira = authenticate()
     response = formatter.issue_summary(jira, key)
     message.reply_webapi('Issue Summary', attachments=json.dumps(response))
@@ -91,7 +125,7 @@ def get_all_issues_salesforce_id(jira, sfid):
 def get_all_onboard_issues(jira, location_id):
     issues = jira.search_issues("""project in (PLATFORM,STUDIO)
      AND issuetype in ('Platform Audit', Credentials, 'Platform Setup', 'Customer Voice', 'Photoshoot')
-     AND 'Location ID' ~ %s""" % location_id)
+     AND 'Location ID' ~ %s AND linksCount = 0""" % location_id)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
