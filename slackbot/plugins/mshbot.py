@@ -97,13 +97,14 @@ def jira_issue(message, key):
 
 @respond_to('help')
 def help(message):
-    message.reply_webapi('Issue Summary', attachments= [{
+    message.reply_webapi('Help Menu', attachments= [{
         "fallback": "Ugh. I don't know what you are asking for. Try 'jira help'",
         "color": "ADD8E6",
         "title": "Commands you can use to get JIRA information:",
         "text": """*help:* Displays this message
-*location <location id>:* Displays a summary of the 5 onboarding issues
+*onboard <location id>:* Displays a summary of the 5 onboarding issues
 *sf <salesforce id>:* Displays a summary of the 5 onboarding issues
+*location <location id>:* Displays a list of all issues associated with a Location ID
 *<issue key>:* Displays a summary of the input issue""",
         "mrkdwn_in": ["text", "pretext", "fields"],
     }])
