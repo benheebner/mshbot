@@ -125,7 +125,7 @@ def get_all_issues_salesforce_id(jira, sfid):
 def get_all_onboard_issues(jira, location_id):
     issues = jira.search_issues("""project in (PLATFORM,STUDIO)
      AND issuetype in ('Platform Audit', Credentials, 'Platform Setup', 'Customer Voice', 'Photoshoot')
-     AND 'Location ID' ~ %s AND linksCount = 0""" % location_id)
+     AND 'Location ID' ~ %s""" % location_id)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
