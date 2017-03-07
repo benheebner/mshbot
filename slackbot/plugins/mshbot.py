@@ -239,7 +239,7 @@ class formatter:
         elif issuetype == "Photoshoot" or issuetype == "Gifted Photoshoot":
             str_list.append(""">*Photoshoot?:* %s\n""" % formatter.get_selectlist(issue, "customfield_10400"))
             str_list.append(""">*Resolution:* %s\n""" % issue.fields.resolution)
-            str_list.append(""">*Pixieset URL:* <link|%s>""" % issue.fields.customfield_10208)
+            str_list.append(""">*Pixieset URL:* <%s|link>\n""" % issue.fields.customfield_10208)
             str_list.append(
                 ">*Photoshoot Date: * %s\n" % formatter.get_date_time(issue.fields.customfield_10205))
             str_list.append(
@@ -249,7 +249,7 @@ class formatter:
             str_list.append(
                 ">*Photoshoot Complete Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_11701))
         elif issuetype == "Customer Voice":
-            str_list.append(""">*Passport URL:* <link|%s>\n""" % issue.fields.customfield_10210)
+            str_list.append(""">*Passport URL:* <%s|link>\n""" % issue.fields.customfield_10210)
             str_list.append(""">*Credentials Complete:* %s\n""" % formatter.get_selectlist(issue, "customfield_11704"))
             str_list.append(""">*Approval Timestamp:* %s\n""" % formatter.get_date_time(issue.fields.customfield_11405))
         elif issuetype == "Credentials":
@@ -269,7 +269,7 @@ class formatter:
             str_list.append(""">*Foursquare:* %s\n""" % formatter.get_selectlist(issue, "customfield_10159"))
             str_list.append(""">*TripAdvisor:* %s\n""" % formatter.get_selectlist(issue, "customfield_10160"))
         elif issuetype == "Identity Refresh":
-            str_list.append(""">*Passport URL:* <link|%s>\n""" % issue.fields.customfield_10210)
+            str_list.append(""">*Passport URL:* <%s|link>\n""" % issue.fields.customfield_10210)
         elif issuetype == "Platform Refresh":
             str_list.append(""">*Due Date:* %s\n""" % formatter.get_date_time(issue.fields.duedate))
 
