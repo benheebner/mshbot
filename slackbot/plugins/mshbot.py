@@ -68,7 +68,7 @@ def jira_gift_link(message, location_id):
        message.reply_webapi('Need to be an admin or in an admin channel to ask for that.')
 
 @respond_to('jira onboard_link (.*)')
-def jira_sflink(message, location_id):
+def jira_onboard_link(message, location_id):
    if is_admin(message.body['channel']):
        jira = authenticate();
        issueDict = get_all_onboard_issues(jira, location_id)
@@ -113,15 +113,22 @@ def jira_issue(message, key):
 
 @respond_to('help')
 def help(message):
+    text = """*help:* Displays this message
+*onboard <location id>:* Displays a summary of the 5 onboarding issues
+*sf <salesforce id>:* Displays a summary of the 5 onboarding issues
+*location <location id>:* Displays a list of all issues associated with a Location ID
+*<issue key>:* Displays a summary of the input issue""" 
+
+    if is_admin(message.body['channel']):
+        text += """\n\nADMIN COMMANDS
+*onboard_link <location id>:* links the 5 onboarding tickets
+*gift_link <location id>:* links the 3 Photoshoot gifting commands"""
+
     message.reply_webapi('Help Menu', attachments= [{
         "fallback": "Ugh. I don't know what you are asking for. Try 'jira help'",
         "color": "ADD8E6",
         "title": "Commands you can use to get JIRA information:",
-        "text": """*help:* Displays this message
-*onboard <location id>:* Displays a summary of the 5 onboarding issues
-*sf <salesforce id>:* Displays a summary of the 5 onboarding issues
-*location <location id>:* Displays a list of all issues associated with a Location ID
-*<issue key>:* Displays a summary of the input issue""",
+        "text": text,
         "mrkdwn_in": ["text", "pretext", "fields"],
     }])
 
