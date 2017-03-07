@@ -205,6 +205,12 @@ class formatter:
             return issue.fields.assignee.displayName
 
     @staticmethod
+    def get_selectlist(issue, fieldname, default="<none>"):
+        if getattr(issue.fields, fieldname) is None:
+            return default
+        return getattr(issue.fields, fieldname).value
+
+    @staticmethod
     def issue_summary(jira, key):
         issue = jira.issue(key)
         return [{
@@ -225,24 +231,47 @@ class formatter:
         str_list.append(""">*Assignee:* %s\n""" % formatter.get_assignee(issue))
         str_list.append(""">*Status:* %s\n""" % issue.fields.status.name)
         str_list.append(""">*Last Updated:* %s\n""" % formatter.get_date_time(issue.fields.updated))
+        issuetype = formatter.get_issuetype(issue)
 
-        if formatter.get_issuetype(issue) == "Platform Audit":
+        if issuetype == "Platform Audit":
             str_list.append(
                 ">*In Progress Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_10808))
-        elif formatter.get_issuetype(issue) == "Photoshoot":
+        elif issuetype == "Photoshoot" or issuetype == "Gifted Photoshoot":
+            str_list.append(""">*Photoshoot?:* %s\n""" % formatter.get_selectlist(issue, "customfield_10400"))
+            str_list.append(""">*Resolution:* %s\n""" % issue.fields.resolution)
+            str_list.append(""">*Pixieset URL:* <link|%s>""" % issue.fields.customfield_10208)
             str_list.append(
                 ">*Photoshoot Date: * %s\n" % formatter.get_date_time(issue.fields.customfield_10205))
-            str_list.append("""><%s|%s>""" % (issue.fields.customfield_10208, "Pixieset URL"))
-        elif formatter.get_issuetype(issue) == "Customer Voice":
+            str_list.append(
+                ">*Scheduled Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_11403))
+            str_list.append(
+                ">*Last Scheduled Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_12900))
+            str_list.append(
+                ">*Photoshoot Complete Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_11701))
+        elif issuetype == "Customer Voice":
+            str_list.append(""">*Passport URL:* <link|%s>\n""" % issue.fields.customfield_10210)
+            str_list.append(""">*Credentials Complete:* %s\n""" % formatter.get_selectlist(issue, "customfield_11704"))
             str_list.append(""">*Approval Timestamp:* %s\n""" % formatter.get_date_time(issue.fields.customfield_11405))
-            str_list.append("""><%s|%s>""" % (issue.fields.customfield_10210, "Passport URL"))
-        elif formatter.get_issuetype(issue) == "Credentials":
-            str_list.append(""">*Facebook:* %s\n""" % issue.fields.customfield_10804.value)
-            str_list.append(""">*Twitter:* %s\n""" % issue.fields.customfield_10507.value)
-            str_list.append(""">*Instagram:* %s\n""" % issue.fields.customfield_12511.value)
-            str_list.append(""">*Google:* %s\n""" % issue.fields.customfield_10510.value)
-            str_list.append(""">*Yelp:* %s\n""" % issue.fields.customfield_10513.value)
-            str_list.append(""">*Foursquare:* %s\n""" % issue.fields.customfield_10809.value)
+        elif issuetype == "Credentials":
+            str_list.append(""">*Facebook:* %s\n""" % formatter.get_selectlist(issue, "customfield_10804"))
+            str_list.append(""">*Twitter:* %s\n""" % formatter.get_selectlist(issue, "customfield_10507"))
+            str_list.append(""">*Instagram:* %s\n""" % formatter.get_selectlist(issue, "customfield_12511"))
+            str_list.append(""">*Google:* %s\n""" % formatter.get_selectlist(issue, "customfield_10510"))
+            str_list.append(""">*Yelp:* %s\n""" % formatter.get_selectlist(issue, "customfield_10513"))
+            str_list.append(""">*Foursquare:* %s\n""" % formatter.get_selectlist(issue, "customfield_10809"))
+            str_list.append(""">*TripAdvisor:* %s\n""" % formatter.get_selectlist(issue, "customfield_10516"))
+        elif issuetype == "Platform Setup":
+            str_list.append(""">*Facebook:* %s\n""" % formatter.get_selectlist(issue, "customfield_10504"))
+            str_list.append(""">*Twitter:* %s\n""" % formatter.get_selectlist(issue, "customfield_10157"))
+            str_list.append(""">*Instagram:* %s\n""" % formatter.get_selectlist(issue, "customfield_12510"))
+            str_list.append(""">*Google:* %s\n""" % formatter.get_selectlist(issue, "customfield_10161"))
+            str_list.append(""">*Yelp:* %s\n""" % formatter.get_selectlist(issue, "customfield_10158"))
+            str_list.append(""">*Foursquare:* %s\n""" % formatter.get_selectlist(issue, "customfield_10159"))
+            str_list.append(""">*TripAdvisor:* %s\n""" % formatter.get_selectlist(issue, "customfield_10160"))
+        elif issuetype == "Identity Refresh":
+            str_list.append(""">*Passport URL:* <link|%s>\n""" % issue.fields.customfield_10210)
+        elif issuetype == "Platform Refresh":
+            str_list.append(""">*Due Date:* %s\n""" % formatter.get_date_time(issue.fields.duedate))
 
         return ''.join(str_list)
 
