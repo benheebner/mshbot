@@ -51,7 +51,23 @@ def jira_location(message, location_id):
     response = formatter.search_results(get_all_jira_issues(jira, location_id))
     message.reply_webapi('Location Summary', attachments=json.dumps(response))
 
-@respond_to('jira link (.*)')
+@respond_to('jira gift_link (.*)')
+def jira_gift_link(message, location_id):
+   if is_admin(message.body['channel']):
+       jira = authenticate();
+       issueDict = get_all_gifted_photoshoot_issues(jira, location_id)
+       jira.create_issue_link('Gifted Photoshoot to Identity Refresh',
+                              issueDict[gifted_photoshoot_id].key, issueDict[identity_refresh_id])
+       jira.create_issue_link('Gifted Photoshoot to Platform Refresh',
+                              issueDict[gifted_photoshoot_id].key, issueDict[platform_refresh_id])
+       jira.create_issue_link('Identity Refresh to Platform Refresh',
+                              issueDict[identity_refresh_id].key, issueDict[platform_refresh_id])
+       response = formatter.search_results(issueDict.values())
+       message.reply_webapi('Gifting Photoahoot Summary', attachments=json.dumps(response))
+   else:
+       message.reply_webapi('Need to be an admin or in an admin channel to ask for that.')
+
+@respond_to('jira onboard_link (.*)')
 def jira_sflink(message, location_id):
    if is_admin(message.body['channel']):
        jira = authenticate();
@@ -79,7 +95,7 @@ def jira_sflink(message, location_id):
        response = formatter.location_summary(get_all_onboard_issues(jira, location_id), "Location ID", location_id)
        message.reply_webapi('Onboard Summary', attachments=json.dumps(response))
    else:
-       message.reply_webapi('Is Not Admin')
+       message.reply_webapi('Need to be an admin or in an admin channel to ask for that.')
 
 @respond_to('jira sf (.*)')
 def jira_sf(message, sfid):
@@ -134,6 +150,11 @@ def get_all_jira_issues(jira, location_id):
     issues = jira.search_issues("""project in (PLATFORM,STUDIO)
      AND 'Location ID' ~ %s ORDER BY created ASC""" % location_id)
     return issues
+
+def get_all_gifted_photoshoot_issues(jira, location_id):
+    issues = jira.search_issues(
+        """project in (PLATFORM,STUDIO) AND issuetype in ('Gifted Photoshoot', 'Identity Refresh', 'Platform Refresh') AND 'Location ID' ~ '%s'""" % location_id)
+    return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
 class formatter:
@@ -230,10 +251,11 @@ class formatter:
             counter += 1
             if counter > 10:
                 break;
-            if issue.fields.issuetype.id == platform_audit_id:
+            if name == "":
                 name = issue.fields.summary
-            str_list.append("""*%s* %s: Updated: %s\n""" % (formatter.get_issuetype(issue),
+            str_list.append("""*%s* %s (%s): Updated: %s\n""" % (formatter.get_issuetype(issue),
                                                       formatter.build_link(formatter.get_issue_link(issue), issue.key),
+                                                      issue.fields.status.name,
                                                       formatter.get_date_time(issue.fields.updated)))
 
         return [{
