@@ -117,12 +117,12 @@ def help(message):
 *onboard <location id>:* Displays a summary of the 5 onboarding issues
 *sf <salesforce id>:* Displays a summary of the 5 onboarding issues
 *location <location id>:* Displays a list of all issues associated with a Location ID
-*<issue key>:* Displays a summary of the input issue""" 
+*<issue key>:* Displays a summary of the input issue"""
 
     if is_admin(message.body['channel']):
         text += """\n\nADMIN COMMANDS
 *onboard_link <location id>:* links the 5 onboarding tickets
-*gift_link <location id>:* links the 3 Photoshoot gifting commands"""
+*gift_link <location id>:* links the 3 Photoshoot gifting tickets"""
 
     message.reply_webapi('Help Menu', attachments= [{
         "fallback": "Ugh. I don't know what you are asking for. Try 'jira help'",
@@ -222,16 +222,13 @@ class formatter:
     @staticmethod
     def long_summary(issue):
         str_list = []
-        str_list.append(""">*Assignee: * %s\n""" % formatter.get_assignee(issue))
-        str_list.append(""">*Status: * %s\n""" % issue.fields.status.name)
-        str_list.append("""Last Updated: * %s\n""" % formatter.get_date_time(issue.fields.updated))
+        str_list.append(""">*Assignee:* %s\n""" % formatter.get_assignee(issue))
+        str_list.append(""">*Status:* %s\n""" % issue.fields.status.name)
+        str_list.append(""">*Last Updated:* %s\n""" % formatter.get_date_time(issue.fields.updated))
 
         if formatter.get_issuetype(issue) == "Platform Audit":
-            str_list.append(""">*Offer Photoshoot:* %s\n""" % issue.fields.customfield_10212.value)
-            str_list.append(""">*Facebook Presence:* %s\n""" % issue.fields.customfield_10502.value)
-            str_list.append(""">*Twitter Presence:* %s\n""" % issue.fields.customfield_10505.value)
-            str_list.append(""">*Google Presence:* %s\n""" % issue.fields.customfield_10508.value)
-            str_list.append(""">*Foursquare Presence:* %s\n""" % issue.fields.customfield_10517.value)
+            str_list.append(
+                ">*In Progress Timestamp: * %s\n" % formatter.get_date_time(issue.fields.customfield_10808))
         elif formatter.get_issuetype(issue) == "Photoshoot":
             str_list.append(
                 ">*Photoshoot Date: * %s\n" % formatter.get_date_time(issue.fields.customfield_10205))
@@ -239,6 +236,14 @@ class formatter:
         elif formatter.get_issuetype(issue) == "Customer Voice":
             str_list.append(""">*Approval Timestamp:* %s\n""" % formatter.get_date_time(issue.fields.customfield_11405))
             str_list.append("""><%s|%s>""" % (issue.fields.customfield_10210, "Passport URL"))
+        elif formatter.get_issuetype(issue) == "Credentials":
+            str_list.append(""">*Facebook:* %s\n""" % issue.fields.customfield_10804.value)
+            str_list.append(""">*Twitter:* %s\n""" % issue.fields.customfield_10507.value)
+            str_list.append(""">*Instagram:* %s\n""" % issue.fields.customfield_12511.value)
+            str_list.append(""">*Google:* %s\n""" % issue.fields.customfield_10510.value)
+            str_list.append(""">*Yelp:* %s\n""" % issue.fields.customfield_10513.value)
+            str_list.append(""">*Foursquare:* %s\n""" % issue.fields.customfield_10809.value)
+
         return ''.join(str_list)
 
     @staticmethod
