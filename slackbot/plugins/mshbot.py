@@ -40,10 +40,9 @@ def is_admin(user):
     return False
 
 
-@respond_to("""jira photographer (\\b\d{5}\\b)""")
-def jira_photographer_zip(message, zipcode):
+@respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{2}\\b)""")
+def jira_photographer_zip(message, zipcode, radius=30):
     jira = authenticate()
-    radius = "25"
     response = requests.get(zipcodeURL % (zipcode, radius))
     str_list = []
     if response.status_code == 200:
@@ -53,7 +52,7 @@ def jira_photographer_zip(message, zipcode):
                 str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
     zips = ' OR '.join(str_list)
     photographers = get_photographers(jira, zips)
-    response = formatter.photographer_list(photographers, zipcode, "25")
+    response = formatter.photographer_list(photographers, zipcode, radius)
     message.reply_webapi('Photographers', attachments=json.dumps(response))
 
 
