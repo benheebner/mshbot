@@ -3,6 +3,7 @@ from slackbot.bot import respond_to
 import json
 import dateutil.parser
 import os
+import requests
 from slackbot.bot import listen_to
 import re
 
@@ -31,11 +32,29 @@ resolution_id_customer_cancelled = '10200'
 resolution_id_photoshoot_not_offered = '10400'
 resolution_id_photoshoot_opted_out = '10100'
 link_id_blocks = '10000'
+zipcodeURL = 'https://www.zipcodeapi.com/rest/S3OFY3cNv0FoOM4d6Fq5RyXkaSiQUwoNActzgFnLF3auPeIWT81LHZ6RRpILV6yw/radius.json/%s/%s/mile'
 
 def is_admin(user):
     if user == 'D44H7U0HM' or user == 'C38NCTQQ1':
         return True
     return False
+
+
+@respond_to("""jira photographer (\\b\d{5}\\b)""")
+def jira_photographer_zip(message, zipcode):
+    jira = authenticate()
+    radius = "25"
+    response = requests.get(zipcodeURL % (zipcode, radius))
+    str_list = []
+    if response.status_code == 200:
+        data = response.json()
+        if len(data) > 0:
+            for zip in data['zip_codes']:
+                str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
+    zips = ' OR '.join(str_list)
+    photographers = get_photographers(jira, zips)
+    response = formatter.photographer_list(photographers, zipcode, "25")
+    message.reply_webapi('Photographers', attachments=json.dumps(response))
 
 
 @respond_to('jira onboard (.*)')
@@ -164,6 +183,12 @@ def get_all_gifted_photoshoot_issues(jira, location_id):
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
+def get_photographers(jira, zip_clause):
+    jql = """project = STUDIO and issuetype = Photographer AND status = Approved and (%s)""" % zip_clause
+    issues = jira.search_issues(jql)
+    return issues
+
+
 class formatter:
     issue_url = """https://msh-success.atlassian.net/browse/%s"""
 
@@ -251,7 +276,10 @@ class formatter:
         elif issuetype == "Customer Voice":
             str_list.append(""">*Passport URL:* <%s|link>\n""" % issue.fields.customfield_10210)
             str_list.append(""">*Credentials Complete:* %s\n""" % formatter.get_selectlist(issue, "customfield_11704"))
-            str_list.append(""">*Approval Timestamp:* %s\n""" % formatter.get_date_time(issue.fields.customfield_11405))
+            str_list.append(""">*Approval Timestamp:* %s\n\n""" % formatter.get_date_time(issue.fields.customfield_11405))
+            str_list.append(""">*Brand Kit Updates:*\n""")
+
+            str_list.append(""">*Brand Kit Updates:*\n""")
         elif issuetype == "Credentials":
             str_list.append(""">*Facebook:* %s\n""" % formatter.get_selectlist(issue, "customfield_10804"))
             str_list.append(""">*Twitter:* %s\n""" % formatter.get_selectlist(issue, "customfield_10507"))
@@ -307,6 +335,24 @@ class formatter:
             "text": ''.join(str_list),
             "mrkdwn_in": ["text", "pretext", "fields"]
         }]
+
+    @staticmethod
+    def photographer_list(issues, zip, radius):
+        str_list = []
+        for issue in issues:
+            str_list.append("""*%s* %s\n""" % (issue.fields.summary,
+                                                                 formatter.build_link(formatter.get_issue_link(issue),
+                                                                                      issue.key)))
+
+        return [{
+            "fallback": "Results",
+            "pretext": "Results",
+            "color": "#36a64f",
+            "title": "Photographers within %s miles of %s" % (radius, zip),
+            "text": ''.join(str_list),
+            "mrkdwn_in": ["text", "pretext", "fields"]
+        }]
+
 
     @staticmethod
     def location_summary(issues, field, id):
