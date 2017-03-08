@@ -81,7 +81,7 @@ def jira_gift_link(message, location_id):
        jira.create_issue_link('Identity Refresh to Platform Refresh',
                               issueDict[identity_refresh_id].key, issueDict[platform_refresh_id])
        response = formatter.search_results(issueDict.values())
-       message.reply_webapi('Gifting Photoahoot Summary', attachments=json.dumps(response))
+       message.reply_webapi('Gifting Photoshoot Summary', attachments=json.dumps(response))
    else:
        message.reply_webapi('Need to be an admin or in an admin channel to ask for that.')
 
