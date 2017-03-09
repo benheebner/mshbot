@@ -44,7 +44,7 @@ def is_admin(user):
 def jira_photographer_zip(message, zipcode, radius=30):
     if radius < 10 or radius > 60:
         message.reply_webapi('Please try a radius between 10 and 60')
-    
+
     jira = authenticate()
     response = requests.get(zipcodeURL % (zipcode, radius))
     str_list = []
@@ -181,7 +181,8 @@ def get_all_jira_issues(jira, location_id):
 
 def get_all_gifted_photoshoot_issues(jira, location_id):
     issues = jira.search_issues(
-        """project in (PLATFORM,STUDIO) AND issuetype in ('Gifted Photoshoot', 'Identity Refresh', 'Platform Refresh') AND 'Location ID' ~ '%s'""" % location_id)
+        """project in (PLATFORM,STUDIO) AND issuetype in ('Gifted Photoshoot', 'Identity Refresh', 'Platform Refresh')
+            AND 'Location ID' ~ '%s' ORDER BY created ASC""" % location_id)
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
