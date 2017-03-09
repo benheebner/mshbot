@@ -41,7 +41,8 @@ def is_admin(user):
 
 
 @respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{2}\\b)""")
-def jira_photographer_zip(message, zipcode, radius=30):
+def jira_photographer_zip(message, zipcode, radius="30"):
+    radius = int(radius)
     if radius < 10 or radius > 60:
         message.reply_webapi('Please try a radius between 10 and 60')
 
