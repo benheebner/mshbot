@@ -44,18 +44,26 @@ def is_admin(user):
 def jira_photographer_zip(message, zipcode, radius="30"):
     radius = int(radius)
     if radius < 0 or radius > 60:
-        message.reply_webapi('Please use a radius between 0 and 60')
+        message.reply_webapi('Please use a radius between 1 and 60')
 
     jira = authenticate()
     response = requests.get(zipcodeURL % (zipcode, radius))
     str_list = []
+    photographers = []
     if response.status_code == 200:
         data = response.json()
         if len(data) > 0:
+            count = 0
             for zip in data['zip_codes']:
+                count += 1
                 str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
-    zips = ' OR '.join(str_list)
-    photographers = get_photographers(jira, zips)
+                if count % 100 == 0:
+                    zips = ' OR '.join(str_list)
+                    photographers.extend(get_photographers(jira, zips))
+                    str_list = []
+    if len(str_list) > 0:
+        zips = ' OR '.join(str_list)
+        photographers.extend(get_photographers(jira, zips))
     response = formatter.photographer_list(photographers, zipcode, radius)
     message.reply_webapi('Photographers', attachments=json.dumps(response))
 
