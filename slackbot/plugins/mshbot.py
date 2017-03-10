@@ -57,7 +57,7 @@ def jira_photographer_zip(message, zipcode, radius="30"):
             for zip in data['zip_codes']:
                 count += 1
                 str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
-                if count % 100 == 0:
+                if count % 50 == 0:
                     zips = ' OR '.join(str_list)
                     photographers.extend(get_photographers(jira, zips))
                     str_list = []
