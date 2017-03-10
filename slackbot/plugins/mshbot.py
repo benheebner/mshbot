@@ -40,11 +40,11 @@ def is_admin(user):
     return False
 
 
-@respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{2}\\b)""")
+@respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{1,2}\\b)""")
 def jira_photographer_zip(message, zipcode, radius="30"):
     radius = int(radius)
-    if radius < 10 or radius > 60:
-        message.reply_webapi('Please use a radius between 10 and 60')
+    if radius < 0 or radius > 60:
+        message.reply_webapi('Please use a radius between 0 and 60')
 
     jira = authenticate()
     response = requests.get(zipcodeURL % (zipcode, radius))
