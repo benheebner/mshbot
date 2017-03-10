@@ -32,7 +32,7 @@ resolution_id_customer_cancelled = '10200'
 resolution_id_photoshoot_not_offered = '10400'
 resolution_id_photoshoot_opted_out = '10100'
 link_id_blocks = '10000'
-zipcodeURL = 'https://www.zipcodeapi.com/rest/S3OFY3cNv0FoOM4d6Fq5RyXkaSiQUwoNActzgFnLF3auPeIWT81LHZ6RRpILV6yw/radius.json/%s/%s/mile'
+zipcodeURL = 'https://www.zipcodeapi.com/rest/' + os.environ.get('ZIP_CODE_API') + '/radius.json/%s/%s/mile'
 
 def is_admin(user):
     if user == 'D44H7U0HM' or user == 'C38NCTQQ1':
@@ -41,7 +41,11 @@ def is_admin(user):
 
 
 @respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{2}\\b)""")
-def jira_photographer_zip(message, zipcode, radius):
+def jira_photographer_zip(message, zipcode, radius="30"):
+    radius = int(radius)
+    if radius < 10 or radius > 60:
+        message.reply_webapi('Please use a radius between 10 and 60')
+
     jira = authenticate()
     response = requests.get(zipcodeURL % (zipcode, radius))
     str_list = []
