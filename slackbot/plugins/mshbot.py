@@ -147,7 +147,8 @@ def help(message):
 *onboard <location id>:* Displays a summary of the 5 onboarding issues
 *sf <salesforce id>:* Displays a summary of the 5 onboarding issues
 *location <location id>:* Displays a list of all issues associated with a Location ID
-*<issue key>:* Displays a summary of the input issue"""
+*<issue key>:* Displays a summary of the input issue
+*photographer <zip> <radius in miles>:* Searches for approved photographers in a radius around a given zip code"""
 
     if is_admin(message.body['channel']):
         text += """\n\nADMIN COMMANDS
