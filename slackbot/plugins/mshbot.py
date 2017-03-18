@@ -4,6 +4,7 @@ import json
 import dateutil.parser
 import os
 import requests
+from simple_salesforce import Salesforce
 from slackbot.bot import listen_to
 import re
 
@@ -127,11 +128,16 @@ def jira_onboard_link(message, location_id):
    else:
        message.reply_webapi('Need to be an admin or in an admin channel to ask for that.')
 
-@respond_to('jira sf (.*)')
-def jira_sf(message, sfid):
-    jira = authenticate()
-    response = formatter.location_summary(get_all_issues_salesforce_id(jira, sfid), "Salesforce ID", sfid)
-    message.reply_webapi('Location Summary', attachments=json.dumps(response))
+@respond_to('jira sf email (.*)')
+def jira_sf_email(message, email):
+    sf = sf_authenticate()
+    if email.startswith("<"):
+        start = email.index("|")
+        email = email[start+1:len(email)-1]
+    str = """SELECT Id, Name, Location_Number__c FROM Account WHERE Contact_1__c = '%s'""" % email
+    accounts = sf.query(str)
+    response = formatter.sf_search_results(email, accounts)
+    message.reply_webapi('Search Results for email: %s' % email, attachments=json.dumps(response))
 
 
 @respond_to('jira (PLATFORM\W[0-9]*|STUDIO\W[0-9]*)')
@@ -148,7 +154,8 @@ def help(message):
 *sf <salesforce id>:* Displays a summary of the 5 onboarding issues
 *location <location id>:* Displays a list of all issues associated with a Location ID
 *<issue key>:* Displays a summary of the input issue
-*photographer <zip> <radius in miles>:* Searches for approved photographers in a radius around a given zip code"""
+*photographer <zip> <radius in miles>:* Searches for approved photographers in a radius around a given zip code
+*jira sf email <email>:* Return a list of SF accounts that match the input email"""
 
     if is_admin(message.body['channel']):
         text += """\n\nADMIN COMMANDS
@@ -167,6 +174,11 @@ def help(message):
 def authenticate():
     return JIRA({'server': os.environ.get('JIRA_SERVER')},
                 basic_auth=(os.environ.get('JIRA_USERNAME'), os.environ.get('JIRA_PASSWORD')))
+
+
+def sf_authenticate():
+    return Salesforce(password=os.environ.get('SF_PASSWORD'), username=os.environ.get('SF_USERNAME'),
+                      security_token=os.environ.get('SF_TOKEN'))
 
 
 def get_all_issues_salesforce_id(jira, sfid):
@@ -423,3 +435,30 @@ class formatter:
             ],
             "mrkdwn_in": ["text", "pretext", "fields"]
         }]
+
+    @staticmethod
+    def sf_search_results(email, accounts):
+        counter = 0;
+        fields = []
+        for account in accounts['records']:
+            counter += 1
+            if counter > 10:
+                break;
+            fields.extend([
+                {
+                    "title": account['Name'],
+                    "value": """>Location ID: %s
+>SF ID: <%s|%s>""" % (account['Location_Number__c'], "https://na4.salesforce.com/%s" % account["Id"], account['Id']),
+                    "short": False
+                }
+            ])
+
+        response = [{
+            "fallback": "Results",
+            "color": "#36a64f",
+            "title": "%d Resuls for email: %s" % (len(accounts) - 1, email),
+            "fields": fields,
+            "mrkdwn_in": ["text", "pretext", "fields"]
+        }]
+
+        return response
