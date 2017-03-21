@@ -41,31 +41,23 @@ def is_admin(user):
     return False
 
 
+@respond_to("""jira photographer new (\\b\d{5}\\b) (\\b\d{1,2}\\b)""")
+def jira_new_photographer_zip(message, zipcode, radius="30"):
+    radius = int(radius)
+    if radius < 0 or radius > 60:
+        message.reply_webapi('Please use a radius between 1 and 60')
+    jira = authenticate()
+    response = formatter.photographer_list(photographer_zip_search(jira, zipcode, radius, "New"), zipcode, radius)
+    message.reply_webapi('Photographers', attachments=json.dumps(response))
+
+
 @respond_to("""jira photographer (\\b\d{5}\\b) (\\b\d{1,2}\\b)""")
 def jira_photographer_zip(message, zipcode, radius="30"):
     radius = int(radius)
     if radius < 0 or radius > 60:
         message.reply_webapi('Please use a radius between 1 and 60')
-
     jira = authenticate()
-    response = requests.get(zipcodeURL % (zipcode, radius))
-    str_list = []
-    photographers = []
-    if response.status_code == 200:
-        data = response.json()
-        if len(data) > 0:
-            count = 0
-            for zip in data['zip_codes']:
-                count += 1
-                str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
-                if count % 50 == 0:
-                    zips = ' OR '.join(str_list)
-                    photographers.extend(get_photographers(jira, zips))
-                    str_list = []
-    if len(str_list) > 0:
-        zips = ' OR '.join(str_list)
-        photographers.extend(get_photographers(jira, zips))
-    response = formatter.photographer_list(photographers, zipcode, radius)
+    response = formatter.photographer_list(photographer_zip_search(jira, zipcode, radius, "Approved"), zipcode, radius)
     message.reply_webapi('Photographers', attachments=json.dumps(response))
 
 
@@ -201,6 +193,7 @@ def get_all_jira_issues(jira, location_id):
      AND 'Location ID' ~ %s ORDER BY created ASC""" % location_id)
     return issues
 
+
 def get_all_gifted_photoshoot_issues(jira, location_id):
     issues = jira.search_issues(
         """project in (PLATFORM,STUDIO) AND issuetype in ('Gifted Photoshoot', 'Identity Refresh', 'Platform Refresh')
@@ -208,8 +201,28 @@ def get_all_gifted_photoshoot_issues(jira, location_id):
     return {str(issue.fields.issuetype.id): issue for issue in issues}
 
 
-def get_photographers(jira, zip_clause):
-    jql = """project = STUDIO and issuetype = Photographer AND status = Approved and (%s)""" % zip_clause
+def photographer_zip_search(jira, zipcode, radius, status):
+    response = requests.get(zipcodeURL % (zipcode, radius))
+    str_list = []
+    photographers = []
+    if response.status_code == 200:
+        data = response.json()
+        if len(data) > 0:
+            count = 0
+            for zip in data['zip_codes']:
+                count += 1
+                str_list.append("""'Zip Code' ~ %s""" % zip['zip_code'])
+                if count % 50 == 0:
+                    zips = ' OR '.join(str_list)
+                    photographers.extend(get_photographers(jira, zips, status))
+                    str_list = []
+    if len(str_list) > 0:
+        zips = ' OR '.join(str_list)
+        photographers.extend(get_photographers(jira, zips, status))
+    return photographers
+
+def get_photographers(jira, zip_clause, status):
+    jql = """project = STUDIO and issuetype = Photographer AND status = '%s' and (%s)""" % (status, zip_clause)
     issues = jira.search_issues(jql)
     return issues
 
