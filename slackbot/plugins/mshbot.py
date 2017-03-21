@@ -57,7 +57,7 @@ def jira_photographer_zip(message, zipcode, radius="30"):
     if radius < 0 or radius > 60:
         message.reply_webapi('Please use a radius between 1 and 60')
     jira = authenticate()
-    response = formatter.photographer_list(photographer_zip_search(jira, zipcode, radius, "Approved"), zipcode, radius)
+    response = formatter.photographer_list(photographer_zip_search(jira, zipcode, radius, "'Portfolio Approved','Account Setup','Onboarding','Approved','Hold', 'Ice Box'"), zipcode, radius)
     message.reply_webapi('Photographers', attachments=json.dumps(response))
 
 
@@ -221,8 +221,9 @@ def photographer_zip_search(jira, zipcode, radius, status):
         photographers.extend(get_photographers(jira, zips, status))
     return photographers
 
+
 def get_photographers(jira, zip_clause, status):
-    jql = """project = STUDIO and issuetype = Photographer AND status = '%s' and (%s)""" % (status, zip_clause)
+    jql = """project = STUDIO and issuetype = Photographer AND status in (%s) and (%s)""" % (status, zip_clause)
     issues = jira.search_issues(jql)
     return issues
 
@@ -378,15 +379,14 @@ class formatter:
     def photographer_list(issues, zip, radius):
         str_list = []
         for issue in issues:
-            str_list.append("""*%s* %s\n""" % (issue.fields.summary,
-                                                                 formatter.build_link(formatter.get_issue_link(issue),
-                                                                                      issue.key)))
+            str_list.append("""*%s* (%s) - %s\n""" % (issue.fields.summary, issue.fields.status.name,
+                                                                 formatter.build_link(formatter.get_issue_link(issue), issue.key)))
 
         return [{
             "fallback": "Results",
             "pretext": "Results",
             "color": "#36a64f",
-            "title": "Photographers within %s miles of %s" % (radius, zip),
+            "title": "%d Photographers within %s miles of %s" % (len(issues), radius, zip),
             "text": ''.join(str_list),
             "mrkdwn_in": ["text", "pretext", "fields"]
         }]
